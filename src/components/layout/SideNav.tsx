@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { to: '/transactions', label: 'Transactions', icon: CreditCard },
   { to: '/bills', label: 'Recurring Bills', icon: Repeat },
   { to: '/goals', label: 'Goals', icon: PiggyBank },
+  { to: '/budget', label: 'Budget', icon: Wallet },
   { to: '/trends', label: 'Trends', icon: TrendingUp },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const

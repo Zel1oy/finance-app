@@ -6,6 +6,7 @@ import { TransactionsPage } from '../features/transactions/TransactionsPage'
 import { BillsPage } from '../features/bills/BillsPage'
 import { GoalsPage } from '../features/goals/GoalsPage'
 import { TrendsPage } from '../features/trends/TrendsPage'
+import { BudgetPage } from '../features/budget/BudgetPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 
 export const router = createBrowserRouter([
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
       { path: 'bills', element: <BillsPage /> },
       { path: 'goals', element: <GoalsPage /> },
       { path: 'trends', element: <TrendsPage /> },
+      { path: 'budget', element: <BudgetPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
   },

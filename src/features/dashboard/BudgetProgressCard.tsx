@@ -30,7 +30,7 @@ export function BudgetProgressCard() {
         title="Budget Progress"
         subtitle={`Based on ${formatMoney(settings.monthlyIncome, settings.baseCurrency)} income`}
         action={
-          <Link to="/settings" className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
+          <Link to="/budget" className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
             Edit
           </Link>
         }

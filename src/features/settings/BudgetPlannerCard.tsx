@@ -84,7 +84,7 @@ export function BudgetPlannerCard() {
                       const v = Math.min(100, Math.max(0, Number(e.target.value)))
                       setBudgets((prev) => ({ ...prev, [cat.id]: v }))
                     }}
-                    className="w-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-16 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-right tabular-nums text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <span className="text-xs text-gray-400">%</span>
                 </div>

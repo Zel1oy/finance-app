@@ -4,7 +4,7 @@ import {
   CreditCard,
   Repeat,
   PiggyBank,
-  TrendingUp,
+  Wallet,
   Settings,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { to: '/transactions', label: 'Transactions', icon: CreditCard },
   { to: '/bills', label: 'Bills', icon: Repeat },
   { to: '/goals', label: 'Goals', icon: PiggyBank },
-  { to: '/trends', label: 'Trends', icon: TrendingUp },
+  { to: '/budget', label: 'Budget', icon: Wallet },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const
 

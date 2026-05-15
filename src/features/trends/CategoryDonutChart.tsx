@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Label } from 'recharts'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { formatMoney } from '../../lib/currencies'
 import { getCategoryDef } from '../../types'
@@ -54,7 +54,7 @@ export function CategoryDonutChart({
           <Pie
             data={data}
             cx="50%"
-            cy="45%"
+            cy="50%"
             innerRadius={65}
             outerRadius={95}
             dataKey="value"
@@ -64,6 +64,21 @@ export function CategoryDonutChart({
             {data.map((entry) => (
               <Cell key={entry.name} fill={entry.color} />
             ))}
+            <Label
+              content={({ viewBox }) => {
+                const vb = viewBox as { cx?: number; cy?: number }
+                const cx = vb.cx ?? 0
+                const cy = vb.cy ?? 0
+                return (
+                  <text textAnchor="middle" dominantBaseline="middle">
+                    <tspan x={cx} y={cy - 8} fontSize="11" fill={textColor}>Total</tspan>
+                    <tspan x={cx} y={cy + 10} fontSize="13" fontWeight="600" fill={isDark ? '#f9fafb' : '#111827'}>
+                      {formatMoney(total, currency)}
+                    </tspan>
+                  </text>
+                )
+              }}
+            />
           </Pie>
           <Tooltip
             formatter={(value) => [
@@ -87,9 +102,6 @@ export function CategoryDonutChart({
           />
         </PieChart>
       </ResponsiveContainer>
-      <p className="text-center text-xs text-gray-400 dark:text-gray-500 -mt-4">
-        Total: {formatMoney(total, currency)}
-      </p>
     </Card>
   )
 }
