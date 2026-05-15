@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
-import { useBillsStore } from '../../store'
+import { useBillsStore, useSettingsStore } from '../../store'
 import * as db from '../../lib/db'
+import { convertAmount, formatMoney } from '../../lib/currencies'
+import { useExchangeRates } from '../../hooks/useExchangeRates'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Modal } from '../../components/ui/Modal'
@@ -12,8 +14,27 @@ import type { BillInput } from './schemas'
 
 export function BillsPage() {
   const { bills, addBill, updateBill, deleteBill } = useBillsStore()
+  const { settings } = useSettingsStore()
+  const rates = useExchangeRates()
+  const displayCurrency = settings.displayCurrency || settings.baseCurrency
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editing, setEditing] = useState<Bill | null>(null)
+
+  const monthlyTotal = useMemo(() => {
+    return bills.reduce((sum, bill) => {
+      let monthlyAmt: number
+      let fromCurrency: string
+      if (bill.percentOfIncome != null && bill.percentOfIncome > 0) {
+        monthlyAmt = (settings.monthlyIncome * bill.percentOfIncome) / 100
+        fromCurrency = settings.baseCurrency
+      } else {
+        const mult = bill.frequency === 'weekly' ? 52 / 12 : bill.frequency === 'yearly' ? 1 / 12 : 1
+        monthlyAmt = bill.amount * mult
+        fromCurrency = bill.currency
+      }
+      return sum + convertAmount(monthlyAmt, fromCurrency, displayCurrency, rates)
+    }, 0)
+  }, [bills, settings.monthlyIncome, settings.baseCurrency, displayCurrency, rates])
 
   function handleAdd(data: BillInput) {
     const { amountType, ...billData } = data
@@ -65,6 +86,25 @@ export function BillsPage() {
           Add Bill
         </Button>
       </div>
+
+      {bills.length > 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Monthly Total</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white tabular-nums">
+              {formatMoney(monthlyTotal, displayCurrency)}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">per month</p>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Yearly Total</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white tabular-nums">
+              {formatMoney(monthlyTotal * 12, displayCurrency)}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">per year</p>
+          </div>
+        </div>
+      )}
 
       <Card padding="none">
         <div className="px-4">

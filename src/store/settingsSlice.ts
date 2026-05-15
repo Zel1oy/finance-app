@@ -4,6 +4,7 @@ import type { Settings, Theme, RateCache } from '../types'
 
 const DEFAULT_SETTINGS: Settings = {
   baseCurrency: 'USD',
+  displayCurrency: 'USD',
   theme: 'system',
   monthlyBudget: 2000,
   monthlyIncome: 0,
@@ -14,6 +15,7 @@ const DEFAULT_SETTINGS: Settings = {
 interface SettingsState {
   settings: Settings
   setBaseCurrency: (code: string) => void
+  setDisplayCurrency: (code: string) => void
   setTheme: (theme: Theme) => void
   setMonthlyBudget: (amount: number) => void
   setMonthlyIncome: (amount: number) => void
@@ -26,7 +28,19 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       settings: DEFAULT_SETTINGS,
       setBaseCurrency: (code) =>
-        set((state) => ({ settings: { ...state.settings, baseCurrency: code } })),
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            baseCurrency: code,
+            // Keep displayCurrency in sync when user hasn't diverged them
+            displayCurrency:
+              state.settings.displayCurrency === state.settings.baseCurrency
+                ? code
+                : state.settings.displayCurrency,
+          },
+        })),
+      setDisplayCurrency: (code) =>
+        set((state) => ({ settings: { ...state.settings, displayCurrency: code } })),
       setTheme: (theme) =>
         set((state) => ({ settings: { ...state.settings, theme } })),
       setMonthlyBudget: (amount) =>
@@ -53,6 +67,10 @@ export const useSettingsStore = create<SettingsState>()(
             // Guarantee new fields are never null/undefined
             monthlyIncome: p.settings?.monthlyIncome ?? 0,
             categoryBudgets: p.settings?.categoryBudgets ?? {},
+            displayCurrency:
+              p.settings?.displayCurrency ??
+              p.settings?.baseCurrency ??
+              DEFAULT_SETTINGS.baseCurrency,
           },
         }
       },

@@ -2,9 +2,9 @@ import { Pencil, Trash2, Calendar } from 'lucide-react'
 import type { Bill } from '../../types'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { formatMoney } from '../../lib/currencies'
 import { formatRelativeDate, getDaysRemaining } from '../../lib/dateUtils'
 import { useSettingsStore } from '../../store'
+import { useFormatMoney } from '../../hooks/useFormatMoney'
 import { cn } from '../../lib/utils'
 
 interface BillItemProps {
@@ -21,6 +21,7 @@ const FREQUENCY_LABELS: Record<Bill['frequency'], string> = {
 
 export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
   const { settings } = useSettingsStore()
+  const { fmt } = useFormatMoney()
   const daysLeft = getDaysRemaining(bill.nextDueDate)
   const isOverdue = daysLeft < 0
   const isSoon = daysLeft >= 0 && daysLeft <= 3
@@ -29,7 +30,7 @@ export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
   const calculatedAmount = isPercent
     ? (settings.monthlyIncome * (bill.percentOfIncome ?? 0)) / 100
     : bill.amount
-  const displayCurrency = isPercent ? settings.baseCurrency : bill.currency
+  const billCurrency = isPercent ? settings.baseCurrency : bill.currency
 
   return (
     <div className="flex items-center gap-3 py-3 group">
@@ -68,7 +69,7 @@ export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
             </p>
           )}
           <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-            {isPercent ? '≈ ' : ''}{formatMoney(calculatedAmount, displayCurrency)}
+            {isPercent ? '≈ ' : ''}{fmt(calculatedAmount, billCurrency)}
           </span>
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

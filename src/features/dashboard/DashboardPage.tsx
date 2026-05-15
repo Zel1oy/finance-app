@@ -8,6 +8,7 @@ import {
   selectUpcomingBills,
 } from '../../store'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
+import { convertAmount } from '../../lib/currencies'
 import { SpendingWidget } from './SpendingWidget'
 import { UpcomingBillsWidget } from './UpcomingBillsWidget'
 import { GoalProgressCards } from './GoalProgressCards'
@@ -30,6 +31,13 @@ export function DashboardPage() {
     [transactions, year, month, settings.baseCurrency, rates],
   )
 
+  const displayCurrency = settings.displayCurrency || settings.baseCurrency
+  const displayExpenses = convertAmount(expenses, settings.baseCurrency, displayCurrency, rates)
+  const displayIncome = convertAmount(income, settings.baseCurrency, displayCurrency, rates)
+  const displayBudget = settings.monthlyBudget > 0
+    ? convertAmount(settings.monthlyBudget, settings.baseCurrency, displayCurrency, rates)
+    : 0
+
   const upcomingBills = useMemo(() => selectUpcomingBills(bills, 7), [bills])
 
   const sortedTransactions = useMemo(
@@ -51,10 +59,10 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SpendingWidget
-          expenses={expenses}
-          income={income}
-          budget={settings.monthlyBudget}
-          currency={settings.baseCurrency}
+          expenses={displayExpenses}
+          income={displayIncome}
+          budget={displayBudget}
+          currency={displayCurrency}
         />
         <UpcomingBillsWidget bills={upcomingBills} />
       </div>

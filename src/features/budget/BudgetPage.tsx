@@ -9,8 +9,8 @@ import {
 } from '../../store'
 import { useAllCategories } from '../../store/categoriesSlice'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
+import { useFormatMoney } from '../../hooks/useFormatMoney'
 import { upsertSettings } from '../../lib/db'
-import { formatMoney } from '../../lib/currencies'
 import { Button } from '../../components/ui/Button'
 import { cn } from '../../lib/utils'
 
@@ -20,6 +20,7 @@ export function BudgetPage() {
   const { transactions } = useTransactionsStore()
   const allCategories = useAllCategories()
   const rates = useExchangeRates()
+  const { fmt } = useFormatMoney()
 
   const [income, setIncome] = useState(settings.monthlyIncome ?? 0)
   const [editingIncome, setEditingIncome] = useState(false)
@@ -126,7 +127,7 @@ export function BudgetPage() {
             aria-label="Edit monthly income"
           >
             <span className="text-3xl font-bold text-white">
-              {income > 0 ? formatMoney(income, settings.baseCurrency) : 'Tap to set income'}
+              {income > 0 ? fmt(income, settings.baseCurrency) : 'Tap to set income'}
             </span>
             <Pencil
               size={16}
@@ -151,7 +152,7 @@ export function BudgetPage() {
               <span className="w-px h-3 bg-white/20" />
               <span>
                 <span className="font-semibold text-white">
-                  {formatMoney(totalSpentThisMonth, settings.baseCurrency)}
+                  {fmt(totalSpentThisMonth, settings.baseCurrency)}
                 </span>{' '}
                 spent
               </span>
@@ -242,7 +243,7 @@ export function BudgetPage() {
                   </p>
                   {hasData ? (
                     <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {formatMoney(allocatedAmt, settings.baseCurrency)}/mo
+                      {fmt(allocatedAmt, settings.baseCurrency)}/mo
                     </p>
                   ) : (
                     <p className="text-xs text-gray-300 dark:text-gray-600">Not budgeted</p>
@@ -284,8 +285,8 @@ export function BudgetPage() {
                   <div className="flex justify-between text-xs">
                     <span className={cn(isOverBudget ? 'text-red-500' : 'text-gray-400 dark:text-gray-500')}>
                       {isOverBudget
-                        ? `Over by ${formatMoney(spent - allocatedAmt, settings.baseCurrency)}`
-                        : `Spent ${formatMoney(spent, settings.baseCurrency)}`}
+                        ? `Over by ${fmt(spent - allocatedAmt, settings.baseCurrency)}`
+                        : `Spent ${fmt(spent, settings.baseCurrency)}`}
                     </span>
                     <span className="text-gray-400 dark:text-gray-500 tabular-nums">
                       {Math.round(usedPct)}% used

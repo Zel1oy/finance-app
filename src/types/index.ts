@@ -83,6 +83,7 @@ export interface RateCache {
 
 export interface Settings {
   baseCurrency: string
+  displayCurrency: string              // currency amounts are shown in (defaults to baseCurrency)
   theme: Theme
   monthlyBudget: number
   monthlyIncome: number

@@ -2,17 +2,18 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { ProgressBar } from '../../components/ui/ProgressBar'
-import { formatMoney } from '../../lib/currencies'
 import { useSettingsStore } from '../../store'
 import { useAllCategories } from '../../store/categoriesSlice'
 import { useTransactionsStore, selectCategoryTotals } from '../../store'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
+import { useFormatMoney } from '../../hooks/useFormatMoney'
 
 export function BudgetProgressCard() {
   const { settings } = useSettingsStore()
   const { transactions } = useTransactionsStore()
   const allCategories = useAllCategories()
   const rates = useExchangeRates()
+  const { fmt } = useFormatMoney()
 
   const now = new Date()
   const categoryTotals = useMemo(
@@ -28,7 +29,7 @@ export function BudgetProgressCard() {
     <Card className="flex flex-col gap-4">
       <CardHeader
         title="Budget Progress"
-        subtitle={`Based on ${formatMoney(settings.monthlyIncome, settings.baseCurrency)} income`}
+        subtitle={`Based on ${fmt(settings.monthlyIncome)} income`}
         action={
           <Link to="/budget" className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
             Edit
@@ -56,9 +57,9 @@ export function BudgetProgressCard() {
                   <span className={`text-xs tabular-nums font-medium ${
                     usedPct >= 100 ? 'text-red-500' : usedPct >= 80 ? 'text-amber-500' : 'text-gray-500'
                   }`}>
-                    {formatMoney(spent, settings.baseCurrency)}
+                    {fmt(spent)}
                   </span>
-                  <span className="text-xs text-gray-400"> / {formatMoney(allocated, settings.baseCurrency)}</span>
+                  <span className="text-xs text-gray-400"> / {fmt(allocated)}</span>
                 </div>
               </div>
               <ProgressBar
