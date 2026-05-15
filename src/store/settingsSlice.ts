@@ -6,6 +6,8 @@ const DEFAULT_SETTINGS: Settings = {
   baseCurrency: 'USD',
   theme: 'system',
   monthlyBudget: 2000,
+  monthlyIncome: 0,
+  categoryBudgets: {},
   rateCache: null,
 }
 
@@ -14,6 +16,8 @@ interface SettingsState {
   setBaseCurrency: (code: string) => void
   setTheme: (theme: Theme) => void
   setMonthlyBudget: (amount: number) => void
+  setMonthlyIncome: (amount: number) => void
+  setCategoryBudgets: (budgets: Record<string, number>) => void
   updateRateCache: (cache: RateCache | null) => void
 }
 
@@ -27,6 +31,10 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({ settings: { ...state.settings, theme } })),
       setMonthlyBudget: (amount) =>
         set((state) => ({ settings: { ...state.settings, monthlyBudget: amount } })),
+      setMonthlyIncome: (amount) =>
+        set((state) => ({ settings: { ...state.settings, monthlyIncome: amount } })),
+      setCategoryBudgets: (budgets) =>
+        set((state) => ({ settings: { ...state.settings, categoryBudgets: budgets } })),
       updateRateCache: (cache) =>
         set((state) => ({ settings: { ...state.settings, rateCache: cache } })),
     }),

@@ -4,6 +4,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { formatMoney } from '../../lib/currencies'
 import { formatRelativeDate, getDaysRemaining } from '../../lib/dateUtils'
+import { useSettingsStore } from '../../store'
 import { cn } from '../../lib/utils'
 
 interface BillItemProps {
@@ -19,9 +20,16 @@ const FREQUENCY_LABELS: Record<Bill['frequency'], string> = {
 }
 
 export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
+  const { settings } = useSettingsStore()
   const daysLeft = getDaysRemaining(bill.nextDueDate)
   const isOverdue = daysLeft < 0
   const isSoon = daysLeft >= 0 && daysLeft <= 3
+
+  const isPercent = bill.percentOfIncome != null && bill.percentOfIncome > 0
+  const calculatedAmount = isPercent
+    ? (settings.monthlyIncome * (bill.percentOfIncome ?? 0)) / 100
+    : bill.amount
+  const displayCurrency = isPercent ? settings.baseCurrency : bill.currency
 
   return (
     <div className="flex items-center gap-3 py-3 group">
@@ -53,9 +61,16 @@ export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
-          {formatMoney(bill.amount, bill.currency)}
-        </span>
+        <div className="text-right">
+          {isPercent && (
+            <p className="text-xs text-brand-600 dark:text-brand-400 font-medium">
+              {bill.percentOfIncome}% of income
+            </p>
+          )}
+          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
+            {isPercent ? '≈ ' : ''}{formatMoney(calculatedAmount, displayCurrency)}
+          </span>
+        </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button variant="ghost" size="icon" onClick={() => onEdit(bill)} aria-label="Edit bill" className="h-7 w-7">
             <Pencil size={13} />

@@ -1,6 +1,6 @@
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CATEGORIES, CATEGORY_LABELS } from '../../types'
+import { useAllCategories } from '../../store/categoriesSlice'
 import { CURRENCY_LIST } from '../../lib/currencies'
 import { autoCategory } from '../../lib/categorize'
 import { todayISO } from '../../lib/dateUtils'
@@ -17,6 +17,7 @@ interface TransactionFormProps {
 }
 
 export function TransactionForm({ initial, onSubmit, onCancel }: TransactionFormProps) {
+  const allCategories = useAllCategories()
   const {
     register,
     handleSubmit,
@@ -112,10 +113,8 @@ export function TransactionForm({ initial, onSubmit, onCancel }: TransactionForm
         control={control}
         render={({ field }) => (
           <Select label="Category" error={errors.category?.message} {...field}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORY_LABELS[c]}
-              </option>
+            {allCategories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </Select>
         )}

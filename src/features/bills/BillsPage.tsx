@@ -16,7 +16,13 @@ export function BillsPage() {
   const [editing, setEditing] = useState<Bill | null>(null)
 
   function handleAdd(data: BillInput) {
-    const b: Bill = { ...data, id: crypto.randomUUID() }
+    const { amountType, ...billData } = data
+    const b: Bill = {
+      ...billData,
+      id: crypto.randomUUID(),
+      amount: amountType === 'percent' ? 0 : billData.amount,
+      percentOfIncome: amountType === 'percent' ? billData.percentOfIncome : undefined,
+    }
     addBill(b)
     void db.insertBill(b)
     setIsModalOpen(false)
@@ -24,8 +30,14 @@ export function BillsPage() {
 
   function handleEdit(data: BillInput) {
     if (editing) {
-      updateBill(editing.id, data)
-      void db.updateBill(editing.id, data)
+      const { amountType, ...billData } = data
+      const patch: Partial<Bill> = {
+        ...billData,
+        amount: amountType === 'percent' ? 0 : billData.amount,
+        percentOfIncome: amountType === 'percent' ? billData.percentOfIncome : undefined,
+      }
+      updateBill(editing.id, patch)
+      void db.updateBill(editing.id, patch)
       setEditing(null)
     }
   }

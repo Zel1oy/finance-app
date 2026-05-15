@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ListFilter, X, ChevronDown } from 'lucide-react'
-import { CATEGORIES, CATEGORY_LABELS } from '../../types'
+import { useAllCategories } from '../../store/categoriesSlice'
 import { CURRENCY_LIST } from '../../lib/currencies'
 import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
@@ -33,6 +33,7 @@ export function TransactionFiltersBar({
 }: TransactionFiltersProps) {
   const active = hasActiveFilters(filters)
   const nonSearchActive = hasNonSearchFilters(filters)
+  const allCategories = useAllCategories()
   const [expanded, setExpanded] = useState(false)
   const showDropdowns = expanded
 
@@ -99,8 +100,8 @@ export function TransactionFiltersBar({
             aria-label="Filter by category"
           >
             <option value="">All categories</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+            {allCategories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </Select>
 

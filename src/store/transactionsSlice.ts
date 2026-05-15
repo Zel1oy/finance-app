@@ -1,11 +1,11 @@
 import { create } from 'zustand'
-import type { Transaction, Category, TransactionType } from '../types'
+import type { Transaction, TransactionType } from '../types'
 import { convertAmount } from '../lib/currencies'
 
 export interface TransactionFilters {
   dateFrom: string | null
   dateTo: string | null
-  category: Category | null
+  category: string | null
   currency: string | null
   type: TransactionType | null
   search: string
@@ -98,22 +98,13 @@ export function selectCategoryTotals(
   month: number,
   baseCurrency: string,
   rates: Record<string, number>,
-): Record<Category, number> {
+): Record<string, number> {
   const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
-  const totals: Record<Category, number> = {
-    food: 0,
-    transport: 0,
-    entertainment: 0,
-    housing: 0,
-    health: 0,
-    savings: 0,
-    income: 0,
-    other: 0,
-  }
+  const totals: Record<string, number> = {}
   for (const t of transactions) {
     if (!t.date.startsWith(monthStr) || t.type !== 'expense') continue
     const converted = convertAmount(t.amount, t.currency, baseCurrency, rates)
-    totals[t.category] += converted
+    totals[t.category] = (totals[t.category] ?? 0) + converted
   }
   return totals
 }

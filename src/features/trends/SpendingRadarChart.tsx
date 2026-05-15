@@ -9,7 +9,6 @@ import {
 } from 'recharts'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { CATEGORY_LABELS } from '../../types'
-import type { Category } from '../../types'
 
 interface RadarDataPoint {
   category: string
@@ -18,27 +17,24 @@ interface RadarDataPoint {
 }
 
 interface SpendingRadarChartProps {
-  thisMonth: Record<Category, number>
-  lastMonth: Record<Category, number>
+  thisMonth: Record<string, number>
+  lastMonth: Record<string, number>
   isDark: boolean
 }
 
 function buildRadarData(
-  thisMonth: Record<Category, number>,
-  lastMonth: Record<Category, number>,
+  thisMonth: Record<string, number>,
+  lastMonth: Record<string, number>,
 ): RadarDataPoint[] {
-  const categories: Category[] = [
-    'food', 'housing', 'transport', 'entertainment', 'health', 'savings', 'other',
-  ]
+  const allIds = [...new Set([...Object.keys(thisMonth), ...Object.keys(lastMonth)])]
+    .filter((id) => id !== 'income')
 
-  const maxThis = Math.max(...Object.values(thisMonth), 1)
-  const maxLast = Math.max(...Object.values(lastMonth), 1)
-  const maxAll = Math.max(maxThis, maxLast, 1)
+  const maxAll = Math.max(...allIds.flatMap((id) => [thisMonth[id] ?? 0, lastMonth[id] ?? 0]), 1)
 
-  return categories.map((c) => ({
-    category: CATEGORY_LABELS[c].split(' ')[0]!,
-    thisMonth: Math.round((thisMonth[c] / maxAll) * 100),
-    lastMonth: Math.round((lastMonth[c] / maxAll) * 100),
+  return allIds.map((id) => ({
+    category: (CATEGORY_LABELS[id] ?? id).split(' ')[0]!,
+    thisMonth: Math.round(((thisMonth[id] ?? 0) / maxAll) * 100),
+    lastMonth: Math.round(((lastMonth[id] ?? 0) / maxAll) * 100),
   }))
 }
 

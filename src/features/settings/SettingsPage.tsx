@@ -8,6 +8,8 @@ import { Button } from '../../components/ui/Button'
 import { ThemeToggle } from './ThemeToggle'
 import { CurrencySelector } from './CurrencySelector'
 import { RatesManager } from './RatesManager'
+import { BudgetPlannerCard } from './BudgetPlannerCard'
+import { CategoriesManager } from './CategoriesManager'
 
 interface BudgetForm {
   monthlyBudget: number
@@ -83,6 +85,16 @@ export function SettingsPage() {
             </Button>
           </form>
         </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="Budget Planner" subtitle="Set % of income per category" />
+        <BudgetPlannerCard />
+      </Card>
+
+      <Card>
+        <CardHeader title="Custom Categories" />
+        <CategoriesManager />
       </Card>
 
       <Card>

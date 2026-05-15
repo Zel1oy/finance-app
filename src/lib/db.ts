@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Transaction, Bill, Goal } from '../types'
+import type { Transaction, Bill, Goal, CategoryDef } from '../types'
 
 // ── Row mappers (DB snake_case ↔ app camelCase) ────────────────────────────
 
@@ -25,8 +25,9 @@ function rowToBill(r: Record<string, unknown>): Bill {
     currency: r.currency as string,
     frequency: r.frequency as Bill['frequency'],
     nextDueDate: r.next_due_date as string,
-    category: r.category as Bill['category'],
+    category: r.category as string,
     note: r.note as string | undefined,
+    percentOfIncome: r.percent_of_income != null ? Number(r.percent_of_income) : undefined,
   }
 }
 
@@ -121,6 +122,7 @@ export async function insertBill(b: Bill): Promise<void> {
     next_due_date: b.nextDueDate,
     category: b.category,
     note: b.note ?? null,
+    percent_of_income: b.percentOfIncome ?? null,
   })
   if (error) console.error('insertBill:', error.message)
 }
@@ -134,6 +136,7 @@ export async function updateBill(id: string, patch: Partial<Bill>): Promise<void
   if (patch.nextDueDate !== undefined) row.next_due_date = patch.nextDueDate
   if (patch.category !== undefined) row.category = patch.category
   if (patch.note !== undefined) row.note = patch.note
+  if (patch.percentOfIncome !== undefined) row.percent_of_income = patch.percentOfIncome ?? null
   const { error } = await supabase.from('bills').update(row).eq('id', id)
   if (error) console.error('updateBill:', error.message)
 }
@@ -192,6 +195,8 @@ export interface DbSettings {
   baseCurrency: string
   theme: string
   monthlyBudget: number
+  monthlyIncome: number
+  categoryBudgets: Record<string, number>
 }
 
 export async function fetchSettings(userId: string): Promise<DbSettings | null> {
@@ -205,6 +210,8 @@ export async function fetchSettings(userId: string): Promise<DbSettings | null> 
     baseCurrency: data.base_currency as string,
     theme: data.theme as string,
     monthlyBudget: Number(data.monthly_budget),
+    monthlyIncome: Number(data.monthly_income ?? 0),
+    categoryBudgets: (data.category_budgets as Record<string, number>) ?? {},
   }
 }
 
@@ -213,6 +220,45 @@ export async function upsertSettings(userId: string, s: Partial<DbSettings>): Pr
   if (s.baseCurrency !== undefined) row.base_currency = s.baseCurrency
   if (s.theme !== undefined) row.theme = s.theme
   if (s.monthlyBudget !== undefined) row.monthly_budget = s.monthlyBudget
+  if (s.monthlyIncome !== undefined) row.monthly_income = s.monthlyIncome
+  if (s.categoryBudgets !== undefined) row.category_budgets = s.categoryBudgets
   const { error } = await supabase.from('user_settings').upsert(row)
   if (error) console.error('upsertSettings:', error.message)
+}
+
+// ── Custom categories ──────────────────────────────────────────────────────
+
+export async function fetchCategories(userId: string): Promise<CategoryDef[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return (data as Record<string, unknown>[]).map((r) => ({
+    id: r.id as string,
+    name: r.name as string,
+    color: r.color as string,
+    isBuiltin: false,
+  }))
+}
+
+export async function insertCategory(cat: CategoryDef, userId: string): Promise<void> {
+  const { error } = await supabase.from('categories').insert({
+    id: cat.id,
+    user_id: userId,
+    name: cat.name,
+    color: cat.color,
+    sort_order: 0,
+  })
+  if (error) console.error('insertCategory:', error.message)
+}
+
+export async function deleteCategory(id: string, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('categories')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+  if (error) console.error('deleteCategory:', error.message)
 }

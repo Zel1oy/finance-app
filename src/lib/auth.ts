@@ -4,7 +4,11 @@ import { useTransactionsStore } from '../store/transactionsSlice'
 import { useBillsStore } from '../store/billsSlice'
 import { useGoalsStore } from '../store/goalsSlice'
 import { useSettingsStore } from '../store/settingsSlice'
-import { fetchTransactions, fetchBills, fetchGoals, fetchSettings, upsertSettings } from './db'
+import { useCategoriesStore } from '../store/categoriesSlice'
+import {
+  fetchTransactions, fetchBills, fetchGoals,
+  fetchSettings, upsertSettings, fetchCategories,
+} from './db'
 import { seedDemoData } from './storage'
 import type { Theme } from '../types'
 
@@ -14,28 +18,34 @@ async function loadUserData(userId: string) {
   if (dataLoading) return
   dataLoading = true
   try {
-    const [transactions, bills, goals, settings] = await Promise.all([
+    const [transactions, bills, goals, settings, categories] = await Promise.all([
       fetchTransactions(userId),
       fetchBills(userId),
       fetchGoals(userId),
       fetchSettings(userId),
+      fetchCategories(userId),
     ])
 
     useTransactionsStore.getState().setTransactions(transactions)
     useBillsStore.getState().setBills(bills)
     useGoalsStore.getState().setGoals(goals)
+    useCategoriesStore.getState().setCustomCategories(categories)
 
     if (settings) {
       const store = useSettingsStore.getState()
       store.setBaseCurrency(settings.baseCurrency)
       store.setTheme(settings.theme as Theme)
       store.setMonthlyBudget(settings.monthlyBudget)
+      store.setMonthlyIncome(settings.monthlyIncome)
+      store.setCategoryBudgets(settings.categoryBudgets)
     } else {
       const s = useSettingsStore.getState().settings
       await upsertSettings(userId, {
         baseCurrency: s.baseCurrency,
         theme: s.theme,
         monthlyBudget: s.monthlyBudget,
+        monthlyIncome: s.monthlyIncome,
+        categoryBudgets: s.categoryBudgets,
       })
     }
 

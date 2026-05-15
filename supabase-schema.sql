@@ -61,3 +61,27 @@ create table if not exists public.user_settings (
 alter table public.user_settings enable row level security;
 create policy "own settings" on public.user_settings
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ── Additions (run these if the tables above already exist) ───────────────
+
+-- Extend user_settings with monthly income and per-category budget percentages
+alter table public.user_settings
+  add column if not exists monthly_income    numeric(12, 2) not null default 0,
+  add column if not exists category_budgets  jsonb          not null default '{}';
+
+-- Extend bills with optional % of income field
+alter table public.bills
+  add column if not exists percent_of_income numeric(5, 2);
+
+-- Custom user-defined categories
+create table if not exists public.categories (
+  id          text not null,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  name        text not null,
+  color       text not null,
+  sort_order  int  not null default 0,
+  primary key (id, user_id)
+);
+alter table public.categories enable row level security;
+create policy "own categories" on public.categories
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

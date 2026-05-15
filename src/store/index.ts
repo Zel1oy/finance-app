@@ -1,5 +1,6 @@
 export { useAuthStore } from './authSlice'
 export { useSettingsStore } from './settingsSlice'
+export { useCategoriesStore, useAllCategories } from './categoriesSlice'
 
 export {
   useTransactionsStore,

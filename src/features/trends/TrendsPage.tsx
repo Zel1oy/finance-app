@@ -5,15 +5,20 @@ import {
   selectMonthlyTotals,
   selectCategoryTotals,
 } from '../../store'
+import { useAllCategories } from '../../store/categoriesSlice'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
+import { convertAmount } from '../../lib/currencies'
 import { getPreviousMonth } from '../../lib/dateUtils'
 import { VelocityStats } from './VelocityStats'
 import { CategoryBarChart } from './CategoryBarChart'
 import { SpendingRadarChart } from './SpendingRadarChart'
+import { SixMonthChart, buildSixMonthData } from './SixMonthChart'
+import { CategoryDonutChart } from './CategoryDonutChart'
 
 export function TrendsPage() {
   const { transactions } = useTransactionsStore()
   const { settings } = useSettingsStore()
+  const allCategories = useAllCategories()
   const rates = useExchangeRates()
   const isDark = document.documentElement.classList.contains('dark')
 
@@ -42,6 +47,11 @@ export function TrendsPage() {
     [transactions, prevYear, prevMonth, settings.baseCurrency, rates],
   )
 
+  const sixMonthData = useMemo(
+    () => buildSixMonthData(transactions, settings.baseCurrency, rates, convertAmount),
+    [transactions, settings.baseCurrency, rates],
+  )
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div>
@@ -50,6 +60,15 @@ export function TrendsPage() {
           Spending analysis and patterns
         </p>
       </div>
+
+      <SixMonthChart data={sixMonthData} currency={settings.baseCurrency} isDark={isDark} />
+
+      <CategoryDonutChart
+        categoryTotals={thisMonthCategories}
+        allCategories={allCategories}
+        currency={settings.baseCurrency}
+        isDark={isDark}
+      />
 
       <VelocityStats
         thisMonthExpenses={thisMonthExpenses}

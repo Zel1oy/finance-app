@@ -12,6 +12,7 @@ import { SpendingWidget } from './SpendingWidget'
 import { UpcomingBillsWidget } from './UpcomingBillsWidget'
 import { GoalProgressCards } from './GoalProgressCards'
 import { RecentTransactions } from './RecentTransactions'
+import { BudgetProgressCard } from './BudgetProgressCard'
 
 export function DashboardPage() {
   const { transactions } = useTransactionsStore()
@@ -59,6 +60,7 @@ export function DashboardPage() {
       </div>
 
       <GoalProgressCards goals={goals} />
+      <BudgetProgressCard />
       <RecentTransactions transactions={sortedTransactions} />
     </div>
   )
