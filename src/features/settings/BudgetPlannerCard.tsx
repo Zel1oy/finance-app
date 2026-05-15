@@ -11,8 +11,8 @@ export function BudgetPlannerCard() {
   const { user } = useAuthStore()
   const allCategories = useAllCategories()
 
-  const [income, setIncome] = useState(settings.monthlyIncome)
-  const [budgets, setBudgets] = useState<Record<string, number>>({ ...settings.categoryBudgets })
+  const [income, setIncome] = useState(settings.monthlyIncome ?? 0)
+  const [budgets, setBudgets] = useState<Record<string, number>>({ ...(settings.categoryBudgets ?? {}) })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 

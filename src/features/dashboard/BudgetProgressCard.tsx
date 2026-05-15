@@ -20,7 +20,7 @@ export function BudgetProgressCard() {
     [transactions, settings.baseCurrency, rates],
   )
 
-  const budgetEntries = Object.entries(settings.categoryBudgets).filter(([, pct]) => pct > 0)
+  const budgetEntries = Object.entries(settings.categoryBudgets ?? {}).filter(([, pct]) => pct > 0)
 
   if (budgetEntries.length === 0 || settings.monthlyIncome === 0) return null
 

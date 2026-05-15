@@ -41,6 +41,21 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'finance-app:settings',
       storage: createJSONStorage(() => localStorage),
+      // Merge persisted state with defaults so new fields always exist
+      merge: (persisted, current) => {
+        const p = persisted as typeof current
+        return {
+          ...current,
+          ...p,
+          settings: {
+            ...DEFAULT_SETTINGS,
+            ...(p.settings ?? {}),
+            // Guarantee new fields are never null/undefined
+            monthlyIncome: p.settings?.monthlyIncome ?? 0,
+            categoryBudgets: p.settings?.categoryBudgets ?? {},
+          },
+        }
+      },
     },
   ),
 )
