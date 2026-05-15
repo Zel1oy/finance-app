@@ -24,7 +24,7 @@ export function AppShell() {
       <TopNav />
       <div className="flex">
         <SideNav />
-        <main className="flex-1 px-4 pt-4 pb-24 sm:pb-8 sm:px-6 max-w-5xl mx-auto w-full">
+        <main className="flex-1 px-4 pt-4 pb-24 sm:pb-10 sm:px-6 max-w-5xl mx-auto w-full">
           <Outlet />
         </main>
       </div>
