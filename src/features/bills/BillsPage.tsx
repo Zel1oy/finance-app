@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Plus } from 'lucide-react'
+import { format, addMonths, parseISO } from 'date-fns'
 import { useBillsStore, useSettingsStore } from '../../store'
 import * as db from '../../lib/db'
 import { convertAmount, formatMoney } from '../../lib/currencies'
@@ -36,13 +37,21 @@ export function BillsPage() {
     }, 0)
   }, [bills, settings.monthlyIncome, settings.baseCurrency, displayCurrency, rates])
 
+  function computeEndDate(nextDueDate: string, durationType: string, durationMonths?: number): string | undefined {
+    if (durationType === 'months' && durationMonths) {
+      return format(addMonths(parseISO(nextDueDate), durationMonths), 'yyyy-MM-dd')
+    }
+    return undefined
+  }
+
   function handleAdd(data: BillInput) {
-    const { amountType, ...billData } = data
+    const { amountType, durationType, durationMonths, ...billData } = data
     const b: Bill = {
       ...billData,
       id: crypto.randomUUID(),
       amount: amountType === 'percent' ? 0 : billData.amount,
       percentOfIncome: amountType === 'percent' ? billData.percentOfIncome : undefined,
+      endDate: computeEndDate(data.nextDueDate, durationType, durationMonths),
     }
     addBill(b)
     void db.insertBill(b)
@@ -51,11 +60,12 @@ export function BillsPage() {
 
   function handleEdit(data: BillInput) {
     if (editing) {
-      const { amountType, ...billData } = data
+      const { amountType, durationType, durationMonths, ...billData } = data
       const patch: Partial<Bill> = {
         ...billData,
         amount: amountType === 'percent' ? 0 : billData.amount,
         percentOfIncome: amountType === 'percent' ? billData.percentOfIncome : undefined,
+        endDate: computeEndDate(data.nextDueDate, durationType, durationMonths),
       }
       updateBill(editing.id, patch)
       void db.updateBill(editing.id, patch)

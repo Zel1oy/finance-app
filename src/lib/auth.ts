@@ -9,6 +9,7 @@ import {
   fetchTransactions, fetchBills, fetchGoals,
   fetchSettings, upsertSettings, fetchCategories,
 } from './db'
+import { processDueBills } from './billUtils'
 import { seedDemoData } from './storage'
 import type { Theme } from '../types'
 
@@ -52,6 +53,9 @@ async function loadUserData(userId: string) {
     if (transactions.length === 0 && bills.length === 0 && goals.length === 0) {
       await seedDemoData(userId)
     }
+
+    // Auto-create transactions for any overdue bills
+    await processDueBills(useSettingsStore.getState().settings)
   } finally {
     dataLoading = false
   }

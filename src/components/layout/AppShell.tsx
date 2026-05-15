@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useAuth } from '../../hooks/useAuth'
 import { useSettingsStore } from '../../store'
 import { CURRENCY_LIST } from '../../lib/currencies'
+import { processDueBills } from '../../lib/billUtils'
 import { TopNav } from './TopNav'
 import { BottomNav } from './BottomNav'
 import { SideNav } from './SideNav'
@@ -11,6 +13,19 @@ export function AppShell() {
   useTheme()
   const { user, loading } = useAuth()
   const { settings, setDisplayCurrency } = useSettingsStore()
+  const lastProcessed = useRef('')
+
+  useEffect(() => {
+    async function tryProcess() {
+      const today = new Date().toISOString().slice(0, 10)
+      if (!user || lastProcessed.current === today) return
+      lastProcessed.current = today
+      await processDueBills(useSettingsStore.getState().settings)
+    }
+    const onVisible = () => { if (document.visibilityState === 'visible') void tryProcess() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [user])
   const displayCurrency = settings.displayCurrency || settings.baseCurrency
 
   if (loading) {

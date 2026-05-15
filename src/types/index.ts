@@ -63,6 +63,7 @@ export interface Bill {
   category: string
   note?: string
   percentOfIncome?: number  // 0–100; if set, amount is auto-calculated from monthlyIncome
+  endDate?: string          // YYYY-MM-DD; if set, no transactions generated past this date
 }
 
 export interface Goal {

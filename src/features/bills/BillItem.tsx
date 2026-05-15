@@ -1,4 +1,5 @@
 import { Pencil, Trash2, Calendar } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
 import type { Bill } from '../../types'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -32,32 +33,42 @@ export function BillItem({ bill, onEdit, onDelete }: BillItemProps) {
     : bill.amount
   const billCurrency = isPercent ? settings.baseCurrency : bill.currency
 
+  const isCompleted = bill.endDate != null && bill.nextDueDate > bill.endDate
+  const endsLabel = bill.endDate && !isCompleted
+    ? `Ends ${format(parseISO(bill.endDate), 'MMM yyyy')}`
+    : null
+
   return (
-    <div className="flex items-center gap-3 py-3 group">
+    <div className={cn('flex items-center gap-3 py-3 group', isCompleted && 'opacity-60')}>
       <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
         <Calendar size={16} />
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{bill.name}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span
             className={cn(
               'text-xs',
-              isOverdue
+              isCompleted
+                ? 'text-gray-400 dark:text-gray-500'
+                : isOverdue
                 ? 'text-red-500 dark:text-red-400 font-medium'
                 : isSoon
                 ? 'text-amber-500 dark:text-amber-400 font-medium'
                 : 'text-gray-400 dark:text-gray-500',
             )}
           >
-            {formatRelativeDate(bill.nextDueDate)}
+            {isCompleted ? 'Completed' : formatRelativeDate(bill.nextDueDate)}
           </span>
           <span className="text-xs text-gray-300 dark:text-gray-700">·</span>
           <span className="text-xs text-gray-400 dark:text-gray-500">
             {FREQUENCY_LABELS[bill.frequency]}
           </span>
           <Badge category={bill.category} className="py-0.5" />
+          {endsLabel && (
+            <span className="text-xs text-gray-400 dark:text-gray-500">{endsLabel}</span>
+          )}
         </div>
       </div>
 

@@ -28,6 +28,7 @@ function rowToBill(r: Record<string, unknown>): Bill {
     category: r.category as string,
     note: r.note as string | undefined,
     percentOfIncome: r.percent_of_income != null ? Number(r.percent_of_income) : undefined,
+    endDate: r.end_date as string | undefined,
   }
 }
 
@@ -123,6 +124,7 @@ export async function insertBill(b: Bill): Promise<void> {
     category: b.category,
     note: b.note ?? null,
     percent_of_income: b.percentOfIncome ?? null,
+    end_date: b.endDate ?? null,
   })
   if (error) console.error('insertBill:', error.message)
 }
@@ -137,6 +139,7 @@ export async function updateBill(id: string, patch: Partial<Bill>): Promise<void
   if (patch.category !== undefined) row.category = patch.category
   if (patch.note !== undefined) row.note = patch.note
   if (patch.percentOfIncome !== undefined) row.percent_of_income = patch.percentOfIncome ?? null
+  if (patch.endDate !== undefined) row.end_date = patch.endDate ?? null
   const { error } = await supabase.from('bills').update(row).eq('id', id)
   if (error) console.error('updateBill:', error.message)
 }

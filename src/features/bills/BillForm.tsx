@@ -1,5 +1,6 @@
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { differenceInMonths, parseISO } from 'date-fns'
 import { useAllCategories } from '../../store/categoriesSlice'
 import { CURRENCY_LIST } from '../../lib/currencies'
 import { todayISO } from '../../lib/dateUtils'
@@ -36,6 +37,10 @@ export function BillForm({ initial, onSubmit, onCancel }: BillFormProps) {
           nextDueDate: initial.nextDueDate,
           category: initial.category,
           note: initial.note ?? '',
+          durationType: initial.endDate ? 'months' : 'forever',
+          durationMonths: initial.endDate
+            ? Math.max(1, differenceInMonths(parseISO(initial.endDate), parseISO(initial.nextDueDate)))
+            : undefined,
         }
       : {
           amountType: 'fixed',
@@ -46,10 +51,13 @@ export function BillForm({ initial, onSubmit, onCancel }: BillFormProps) {
           amount: 0,
           name: '',
           note: '',
+          durationType: 'forever' as const,
+          durationMonths: undefined,
         },
   })
 
   const amountType = useWatch({ control, name: 'amountType' })
+  const durationType = useWatch({ control, name: 'durationType' })
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -162,6 +170,47 @@ export function BillForm({ initial, onSubmit, onCancel }: BillFormProps) {
         error={errors.note?.message}
         {...register('note')}
       />
+
+      <div>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Duration</p>
+        <Controller
+          name="durationType"
+          control={control}
+          render={({ field }) => (
+            <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {(['forever', 'months'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => field.onChange(type)}
+                  className={cn(
+                    'flex-1 py-2.5 text-sm font-medium transition-all',
+                    field.value === type
+                      ? 'bg-brand-500 text-white'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800',
+                  )}
+                >
+                  {type === 'forever' ? 'Ongoing' : 'Fixed duration'}
+                </button>
+              ))}
+            </div>
+          )}
+        />
+        {durationType === 'months' && (
+          <div className="mt-2">
+            <Input
+              label="Number of months"
+              type="number"
+              min="1"
+              max="600"
+              placeholder="e.g. 12"
+              hint="Bill will auto-stop after this many months"
+              error={errors.durationMonths?.message}
+              {...register('durationMonths', { valueAsNumber: true })}
+            />
+          </div>
+        )}
+      </div>
 
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">

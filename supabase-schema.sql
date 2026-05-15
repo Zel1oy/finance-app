@@ -85,3 +85,6 @@ create table if not exists public.categories (
 alter table public.categories enable row level security;
 create policy "own categories" on public.categories
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Bill duration support
+alter table public.bills add column if not exists end_date text;
