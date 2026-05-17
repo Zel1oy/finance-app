@@ -10,6 +10,7 @@ import { Card } from '../../components/ui/Card'
 import { Modal } from '../../components/ui/Modal'
 import { BillList } from './BillList'
 import { BillForm } from './BillForm'
+import { LoanPayoffCalculator } from './LoanPayoffCalculator'
 import type { Bill } from '../../types'
 import type { BillInput } from './schemas'
 
@@ -121,6 +122,8 @@ export function BillsPage() {
           <BillList bills={sorted} onEdit={setEditing} onDelete={handleDelete} />
         </div>
       </Card>
+
+      <LoanPayoffCalculator />
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Recurring Bill">
         <BillForm onSubmit={handleAdd} onCancel={() => setIsModalOpen(false)} />
