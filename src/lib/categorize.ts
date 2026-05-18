@@ -75,3 +75,40 @@ export function autoCategory(description: string): Category {
   }
   return 'other'
 }
+
+export function categoryFromMcc(mcc: number): Category {
+  if ((mcc >= 5411 && mcc <= 5499) || (mcc >= 5811 && mcc <= 5814)) return 'food'
+  if (
+    (mcc >= 4111 && mcc <= 4131) ||
+    mcc === 4411 ||
+    mcc === 4511 ||
+    mcc === 4784 ||
+    mcc === 5541 ||
+    mcc === 5542 ||
+    mcc === 7511 ||
+    mcc === 7512
+  ) return 'transport'
+  if (
+    (mcc >= 5600 && mcc <= 5699) ||
+    (mcc >= 5900 && mcc <= 5945) ||
+    (mcc >= 7011 && mcc <= 7041) ||
+    (mcc >= 7900 && mcc <= 7999) ||
+    mcc === 5815 ||
+    mcc === 5816 ||
+    mcc === 5817 ||
+    mcc === 5818
+  ) return 'entertainment'
+  if (
+    (mcc >= 8011 && mcc <= 8099) ||
+    mcc === 5047 ||
+    mcc === 5122 ||
+    mcc === 5912
+  ) return 'health'
+  if (
+    mcc === 4900 ||
+    (mcc >= 4814 && mcc <= 4816) ||
+    mcc === 4899 ||
+    mcc === 7372
+  ) return 'housing'
+  return 'other'
+}

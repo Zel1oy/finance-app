@@ -51,6 +51,7 @@ export interface Transaction {
   currency: string
   note?: string
   createdAt: string
+  externalId?: string
 }
 
 export interface Bill {
@@ -90,4 +91,5 @@ export interface Settings {
   monthlyIncome: number
   categoryBudgets: Record<string, number>  // category id → % of income (0–100)
   rateCache: RateCache | null
+  monobankToken: string
 }

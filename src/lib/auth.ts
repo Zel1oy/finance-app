@@ -39,6 +39,7 @@ async function loadUserData(userId: string) {
       store.setMonthlyBudget(settings.monthlyBudget)
       store.setMonthlyIncome(settings.monthlyIncome)
       store.setCategoryBudgets(settings.categoryBudgets)
+      store.setMonobankToken(settings.monobankToken)
     } else {
       const s = useSettingsStore.getState().settings
       await upsertSettings(userId, {
@@ -47,6 +48,7 @@ async function loadUserData(userId: string) {
         monthlyBudget: s.monthlyBudget,
         monthlyIncome: s.monthlyIncome,
         categoryBudgets: s.categoryBudgets,
+        monobankToken: s.monobankToken,
       })
     }
 

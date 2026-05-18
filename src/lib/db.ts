@@ -14,6 +14,7 @@ function rowToTransaction(r: Record<string, unknown>): Transaction {
     currency: r.currency as string,
     note: r.note as string | undefined,
     createdAt: r.created_at as string,
+    externalId: r.external_id as string | undefined,
   }
 }
 
@@ -77,8 +78,19 @@ export async function insertTransaction(t: Transaction): Promise<void> {
     currency: t.currency,
     note: t.note ?? null,
     created_at: t.createdAt,
+    external_id: t.externalId ?? null,
   })
   if (error) console.error('insertTransaction:', error.message)
+}
+
+export async function fetchExternalIds(userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('external_id')
+    .eq('user_id', userId)
+    .not('external_id', 'is', null)
+  if (error) return new Set()
+  return new Set((data as Record<string, unknown>[]).map((r) => r.external_id as string))
 }
 
 export async function updateTransaction(id: string, patch: Partial<Transaction>): Promise<void> {
@@ -200,6 +212,7 @@ export interface DbSettings {
   monthlyBudget: number
   monthlyIncome: number
   categoryBudgets: Record<string, number>
+  monobankToken: string
 }
 
 export async function fetchSettings(userId: string): Promise<DbSettings | null> {
@@ -215,6 +228,7 @@ export async function fetchSettings(userId: string): Promise<DbSettings | null> 
     monthlyBudget: Number(data.monthly_budget),
     monthlyIncome: Number(data.monthly_income ?? 0),
     categoryBudgets: (data.category_budgets as Record<string, number>) ?? {},
+    monobankToken: (data.monobank_token as string) ?? '',
   }
 }
 
@@ -225,6 +239,7 @@ export async function upsertSettings(userId: string, s: Partial<DbSettings>): Pr
   if (s.monthlyBudget !== undefined) row.monthly_budget = s.monthlyBudget
   if (s.monthlyIncome !== undefined) row.monthly_income = s.monthlyIncome
   if (s.categoryBudgets !== undefined) row.category_budgets = s.categoryBudgets
+  if (s.monobankToken !== undefined) row.monobank_token = s.monobankToken
   const { error } = await supabase.from('user_settings').upsert(row)
   if (error) console.error('upsertSettings:', error.message)
 }

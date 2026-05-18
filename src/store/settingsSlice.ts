@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS: Settings = {
   monthlyIncome: 0,
   categoryBudgets: {},
   rateCache: null,
+  monobankToken: '',
 }
 
 interface SettingsState {
@@ -21,6 +22,7 @@ interface SettingsState {
   setMonthlyIncome: (amount: number) => void
   setCategoryBudgets: (budgets: Record<string, number>) => void
   updateRateCache: (cache: RateCache | null) => void
+  setMonobankToken: (token: string) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -51,6 +53,8 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({ settings: { ...state.settings, categoryBudgets: budgets } })),
       updateRateCache: (cache) =>
         set((state) => ({ settings: { ...state.settings, rateCache: cache } })),
+      setMonobankToken: (token) =>
+        set((state) => ({ settings: { ...state.settings, monobankToken: token } })),
     }),
     {
       name: 'finance-app:settings',
@@ -71,6 +75,7 @@ export const useSettingsStore = create<SettingsState>()(
               p.settings?.displayCurrency ??
               p.settings?.baseCurrency ??
               DEFAULT_SETTINGS.baseCurrency,
+            monobankToken: p.settings?.monobankToken ?? '',
           },
         }
       },

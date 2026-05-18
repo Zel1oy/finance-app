@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Plus, CheckSquare, Trash2 } from 'lucide-react'
-import { useTransactionsStore, selectFilteredTransactions } from '../../store'
+import { Plus, CheckSquare, Trash2, Building2 } from 'lucide-react'
+import { useTransactionsStore, selectFilteredTransactions, useSettingsStore } from '../../store'
 import * as db from '../../lib/db'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -8,14 +8,17 @@ import { Modal } from '../../components/ui/Modal'
 import { TransactionList } from './TransactionList'
 import { TransactionForm } from './TransactionForm'
 import { TransactionFiltersBar } from './TransactionFilters'
+import { MonobankImportModal } from './MonobankImportModal'
 import type { Transaction } from '../../types'
 import type { TransactionInput } from './schemas'
 
 export function TransactionsPage() {
   const { transactions, filters, addTransaction, updateTransaction, deleteTransaction, setFilters, resetFilters } =
     useTransactionsStore()
+  const { settings } = useSettingsStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isImportOpen, setIsImportOpen] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -119,6 +122,12 @@ export function TransactionsPage() {
                   Select
                 </Button>
               )}
+              {settings.monobankToken && (
+                <Button variant="outline" size="sm" onClick={() => setIsImportOpen(true)}>
+                  <Building2 size={14} />
+                  Monobank
+                </Button>
+              )}
               <Button onClick={() => setIsModalOpen(true)} size="sm">
                 <Plus size={15} />
                 Add
@@ -159,6 +168,8 @@ export function TransactionsPage() {
           />
         )}
       </Modal>
+
+      <MonobankImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
     </div>
   )
 }

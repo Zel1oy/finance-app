@@ -88,3 +88,11 @@ create policy "own categories" on public.categories
 
 -- Bill duration support
 alter table public.bills add column if not exists end_date text;
+
+-- Monobank integration: external transaction IDs for deduplication
+alter table public.transactions add column if not exists external_id text;
+create unique index if not exists transactions_external_id_idx
+  on public.transactions(user_id, external_id) where external_id is not null;
+
+-- Monobank personal token stored per user
+alter table public.user_settings add column if not exists monobank_token text not null default '';

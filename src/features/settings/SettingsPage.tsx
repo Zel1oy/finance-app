@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Eye, EyeOff } from 'lucide-react'
 import { useSettingsStore, useAuthStore } from '../../store'
 import { upsertSettings } from '../../lib/db'
 import { supabase } from '../../lib/supabase'
@@ -15,12 +17,30 @@ interface BudgetForm {
 }
 
 export function SettingsPage() {
-  const { settings, setBaseCurrency, setMonthlyBudget } = useSettingsStore()
+  const { settings, setBaseCurrency, setMonthlyBudget, setMonobankToken } = useSettingsStore()
   const { user } = useAuthStore()
+  const [tokenInput, setTokenInput] = useState('')
+  const [tokenVisible, setTokenVisible] = useState(false)
+  const [tokenSaved, setTokenSaved] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isDirty } } = useForm<BudgetForm>({
     defaultValues: { monthlyBudget: settings.monthlyBudget },
   })
+
+  function handleSaveToken() {
+    const token = tokenInput.trim()
+    if (!token) return
+    setMonobankToken(token)
+    if (user) void upsertSettings(user.id, { monobankToken: token })
+    setTokenInput('')
+    setTokenSaved(true)
+    setTimeout(() => setTokenSaved(false), 2000)
+  }
+
+  function handleRemoveToken() {
+    setMonobankToken('')
+    if (user) void upsertSettings(user.id, { monobankToken: '' })
+  }
 
   function handleCurrencyChange(code: string) {
     setBaseCurrency(code)
@@ -89,6 +109,65 @@ export function SettingsPage() {
       <Card>
         <CardHeader title="Custom Categories" />
         <CategoriesManager />
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Bank Connections"
+          subtitle="Connect Monobank to import transactions"
+        />
+        <div className="flex flex-col gap-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Get your personal token from the{' '}
+            <span className="font-medium text-gray-700 dark:text-gray-300">
+              Monobank app → Settings → Other → API
+            </span>
+            . The token is stored securely and only accessible to you.
+          </p>
+
+          {settings.monobankToken ? (
+            <div className="flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 px-4 py-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Connected</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                  {'••••••' + settings.monobankToken.slice(-6)}
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleRemoveToken}>
+                Remove
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <input
+                  type={tokenVisible ? 'text' : 'password'}
+                  value={tokenInput}
+                  onChange={(e) => setTokenInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveToken() }}
+                  placeholder="Paste your Monobank token"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 pr-10 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-gray-900"
+                />
+                <button
+                  type="button"
+                  onClick={() => setTokenVisible((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  aria-label={tokenVisible ? 'Hide token' : 'Show token'}
+                >
+                  {tokenVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <Button
+                size="sm"
+                className="self-end"
+                onClick={handleSaveToken}
+                disabled={!tokenInput.trim()}
+              >
+                {tokenSaved ? 'Saved ✓' : 'Save Token'}
+              </Button>
+            </div>
+          )}
+        </div>
       </Card>
 
       <Card>
